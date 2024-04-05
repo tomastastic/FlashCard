@@ -1,0 +1,15 @@
+anki==24.4
+beautifulsoup4==4.12.3
+certifi==2024.2.2
+charset-normalizer==3.3.2
+decorator==5.1.1
+idna==3.6
+importlib_metadata==7.1.0
+Markdown==3.6
+orjson==3.10.0
+protobuf==5.26.1
+PySocks==1.7.1
+requests==2.31.0
+soupsieve==2.5
+urllib3==2.2.1
+zipp==3.18.1
