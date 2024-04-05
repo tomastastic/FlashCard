@@ -1,2 +1,2 @@
-# FlaskCard
+# FlashCard
 FlashCard website
