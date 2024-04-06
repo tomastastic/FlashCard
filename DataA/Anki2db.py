@@ -7,33 +7,63 @@ Goal: Find out about the structure of the file for conversion
     3. Separate the decks into separate dbs
     4. What about sound files?
 '''
-import zipfile
-import sqlite3
+import json
 import os
+import sqlite3
 import tempfile
+import zipfile
 
-# Open the .apkg file
-with zipfile.ZipFile('/Users/air/Desktop/delete/WaniKani_Complete_Lv_1-60.apkg', 'r') as myzip:
-    # Extract the collection.anki2 file to a temporary location
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        tmp.write(myzip.read('collection.anki2'))
-        temp_filename = tmp.name
+def extract_db_from_apkg(apkg_path):
+    """Extracts the collection.anki2 file from an .apkg file."""
+    with zipfile.ZipFile(apkg_path, 'r') as myzip:
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            tmp.write(myzip.read('collection.anki2'))
+            return tmp.name
 
-# Connect to the SQLite database
-conn = sqlite3.connect(temp_filename)
+def print_table_names(db_path, print_columns=False):
+    """Prints the names of all tables in a SQLite database.
 
-# Create a cursor object
-cur = conn.cursor()
+    Args:
+        db_path: A string representing the path to the SQLite database file.
+        print_columns: A boolean indicating whether to print the columns of each table.
+    """
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cur.fetchall()
+    print("Tables in the collection.anki2 database:")
+    for table in tables:
+        print(table[0])
+        if print_columns:
+            cur.execute(f"PRAGMA table_info({table[0]});")
+            columns = cur.fetchall()
+            print("Columns in the {} table:".format(table[0]))
+            for column in columns:
+                print(column[1])
+    conn.close()
 
-# Execute a query to get the names of all tables in the database
-cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
 
-# Print the names of the tables
-print("Tables in the collection.anki2 database:")
-print(cur.fetchall())
+def print_deck_names(db_path, print_fields=False):
+    """Prints the names of all decks in a SQLite database."""
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute("SELECT decks FROM col;")
+    decks = json.loads(cur.fetchone()[0])
+    print("Decks in the collection.anki2 database:")
+    for deck in decks.values():
+        print(deck['name'])
+        if print_fields:
+            print(f"Fields in the {deck['name']} deck:")
+            print(deck.keys())
+    conn.close()
 
-# Close the connection to the database
-conn.close()
+def main():
+    """Main function to run the script."""
+    apkg_path = '/Users/air/Desktop/delete/WaniKani_Complete_Lv_1-60.apkg'
+    db_path = extract_db_from_apkg(apkg_path)
+    print_table_names(db_path, print_columns=True)
+    #print_deck_names(db_path, print_fields=False)
+    os.remove(db_path)
 
-# Remove the temporary file
-os.remove(temp_filename)
+if __name__ == "__main__":
+    main()
