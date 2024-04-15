@@ -41,24 +41,27 @@ def print_table_names(db_path, print_columns=False):
             columns = cur.fetchall()
             print("Columns in the {} table:".format(table[0]))
             for column in columns:
-                print(column[1])
+                print(f"{column[1]} ({column[2]})")  # print column name and data type
     conn.close()
 
 
-def print_deck_names(db_path, print_fields=False):
-    """Prints the names of all decks in a SQLite database."""
+def print_models(db_path, ids):
+    """Prints specific rows' values from the models column in the col table.
+
+    Args:
+        db_path: A string representing the path to the SQLite database file.
+        ids: A list of integers representing the id numbers of the rows.
+    """
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute("SELECT decks FROM col;")
-    decks = json.loads(cur.fetchone()[0])
-    print("Decks in the collection.anki2 database:")
-    for deck in decks.values():
-        print(deck['name'])
-        if print_fields:
-            print(f"Fields in the {deck['name']} deck:")
-            print(deck.keys())
+    cur.execute("SELECT models FROM col;")
+    all_models = cur.fetchall()
+    for models in all_models:
+        models_values = json.loads(models[0])
+        for key, value in models_values.items():
+            if int(key) in ids:
+                print(f"Model ID: {key}, Model Data: {value}")
     conn.close()
-
 def export_tables_to_csv(db_path, output_dir):
     """Exports each table in a SQLite database to a CSV file.
 
@@ -113,8 +116,9 @@ def main():
     """Main function to run the script."""
     apkg_path = '/Users/air/Desktop/delete/WaniKani_Complete_Lv_1-60.apkg'
     db_path = extract_db_from_apkg(apkg_path)
-    print_table_names(db_path, print_columns=True)
-    print_deck_names(db_path, print_fields=False)
+    #print_table_names(db_path, print_columns=True)
+    ids = [1411914227416, 1413076182153, 1413061256153]
+    print_models(db_path, ids)
     #export_tables_to_csv(db_path, '/Users/air/Desktop/delete')
     #printfields(db_path,1512422789857 )
     os.remove(db_path)
