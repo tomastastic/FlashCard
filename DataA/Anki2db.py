@@ -62,38 +62,60 @@ def print_models(db_path, ids):
             if int(key) in ids:
                 print(f"Model ID: {key}, Model Data: {value}")
     conn.close()
-def export_tables_to_csv(db_path, output_dir):
-    """Exports each table in a SQLite database to a CSV file.
+
+
+def replace_char_in_db(db_path, table_name, column_name, old_char, new_char):
+    """Replaces a character in a specific column of a specific table in a SQLite database.
 
     Args:
         db_path: A string representing the path to the SQLite database file.
-        output_dir: A string representing the directory to output the CSV files.
+        table_name: A string representing the name of the table.
+        column_name: A string representing the name of the column.
+        old_char: The character to be replaced.
+        new_char: The character to replace with.
     """
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
 
-    # Get the names of all tables in the database
-    cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    tables = cur.fetchall()
+    # Update the specified column in the specified table
+    cur.execute(f"""
+        UPDATE {table_name}
+        SET {column_name} = REPLACE({column_name}, ?, ?);
+    """, (old_char, new_char))
 
-    for table in tables:
-        table_name = table[0]
+    conn.commit()
+    conn.close()
 
-        # Get all rows from the table
-        cur.execute(f"SELECT * FROM {table_name};")
-        rows = cur.fetchall()
 
-        # Get the column names for the table
-        cur.execute(f"PRAGMA table_info({table_name});")
-        columns = [column[1] for column in cur.fetchall()]
+def export_table_to_csv(db_path, output_dir, table_name, columns):
+    """Exports specific columns from a specific table in a SQLite database to a CSV file.
 
-        # Create a CSV file for the table
-        with open(os.path.join(output_dir, f"{table_name}.csv"), 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(columns)
-            writer.writerows(rows)
+    Args:
+        db_path: A string representing the path to the SQLite database file.
+        output_dir: A string representing the directory to output the CSV files.
+        table_name: A string representing the name of the table.
+        columns: A list of strings representing the names of the columns.
+    """
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+
+    # Create a string with the column names separated by commas
+    columns_str = ', '.join(columns)
+
+    # Get the specified columns from the specified table
+    cur.execute(f"SELECT {columns_str} FROM {table_name};")
+    rows = cur.fetchall()
+
+    # Create a CSV file for the table
+    with open(os.path.join(output_dir, f"{table_name}.csv"), 'w', newline='', encoding='utf-8-sig') as f:
+        writer = csv.writer(f, delimiter='|')  # Use pipe as delimiter
+        writer.writerow(columns)
+        for row in rows:
+            new_row = [field.decode('utf-8').replace('\x1f', '|') if isinstance(field, bytes) else field for field in row]
+            writer.writerow(new_row)
 
     conn.close()
+
 
 def printfields(db_path, id):
     """Prints a specific row's values from the flds column in the notes table.
@@ -118,9 +140,15 @@ def main():
     db_path = extract_db_from_apkg(apkg_path)
     #print_table_names(db_path, print_columns=True)
     ids = [1411914227416, 1413076182153, 1413061256153]
-    print_models(db_path, ids)
+    #print_models(db_path, ids)
     #export_tables_to_csv(db_path, '/Users/air/Desktop/delete')
     #printfields(db_path,1512422789857 )
+    replace_char_in_db(db_path, 'notes', 'flds', '\x1f', '|')
+    output_dir = '/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv'
+    table_name = 'notes'
+    columns = ['flds']
+    export_table_to_csv(db_path, output_dir, table_name, columns)
+
     os.remove(db_path)
 
 if __name__ == "__main__":
