@@ -13,7 +13,11 @@ import sqlite3
 import tempfile
 import zipfile
 import csv
+import sys  
+import pandas as pd
+from sqlalchemy import create_engine
 
+# -*- coding: utf_8 -*-
 
 def extract_db_from_apkg(apkg_path):
     """Extracts the collection.anki2 file from an .apkg file."""
@@ -111,7 +115,7 @@ def export_table_to_csv(db_path, output_dir, table_name, columns):
         writer = csv.writer(f, delimiter='|')  # Use pipe as delimiter
         writer.writerow(columns)
         for row in rows:
-            new_row = [field.decode('utf-8').replace('\x1f', '|') if isinstance(field, bytes) else field for field in row]
+            new_row = [field.decode('utf-8-sig').replace('\x1f', '|') if isinstance(field, bytes) else field for field in row]
             writer.writerow(new_row)
 
     conn.close()
@@ -128,28 +132,74 @@ def printfields(db_path, id):
     cur = conn.cursor()
     cur.execute(f"SELECT flds FROM notes WHERE id={id};")
     flds = cur.fetchone()[0]
+    print(type(flds))  # Print the type of the flds value
     flds_values = flds.split('\x1f')
     for value in flds_values:
-        print(value)
-    conn.close()
+        for char in value:
+            print(hex(ord(char)))  # Print the Unicode code point of each character
+
+
+
+
+
+def clean_csv(input_file_path, output_file_path):
+    # Open the input CSV file in binary mode and read the content
+    with open(input_file_path, 'rb') as file:
+        binary_content = file.read()
+
+    try:
+        # Try to decode the entire content with UTF-8
+        decoded_content = binary_content.decode('utf-8')
+    except UnicodeDecodeError as e:
+        # If there's a decoding error, find the position of the problematic character
+        bad_byte_index = e.start
+        # Remove the problematic character and any adjacent pipes
+        cleaned_binary_content = (binary_content[:bad_byte_index].rstrip(b'|') +
+                                  binary_content[bad_byte_index+1:].lstrip(b'|'))
+        # Attempt to decode again
+        decoded_content = cleaned_binary_content.decode('utf-8')
+
+    # Write the cleaned content to the output CSV file
+    with open(output_file_path, 'w', newline='', encoding='utf-8') as file:
+        file.write(decoded_content)
+
+
+
+
+
+def import_csv_to_mysql(csv_file_path, mysql_db_name, table_name):
+    # Create a connection to the MySQL database
+    engine = create_engine(f'mysql+pymysql://root:@localhost/{mysql_db_name}')    
+
+    # Read the CSV file
+    df = pd.read_csv(csv_file_path)
+
+    # Write the data to the MySQL database
+    df.to_sql(table_name, con=engine, if_exists='append', index=False)
+
+    return f"Data imported to {mysql_db_name} database"
+
 
 
 def main():
     """Main function to run the script."""
     apkg_path = '/Users/air/Desktop/delete/WaniKani_Complete_Lv_1-60.apkg'
     db_path = extract_db_from_apkg(apkg_path)
+    print(db_path)
     #print_table_names(db_path, print_columns=True)
     ids = [1411914227416, 1413076182153, 1413061256153]
     #print_models(db_path, ids)
     #export_tables_to_csv(db_path, '/Users/air/Desktop/delete')
-    #printfields(db_path,1512422789857 )
-    replace_char_in_db(db_path, 'notes', 'flds', '\x1f', '|')
+    #printfields(db_path,1413122652443 )
+
+    #replace_char_in_db(db_path, 'notes', 'flds', '\x1f', '|')
     output_dir = '/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv'
     table_name = 'notes'
     columns = ['flds']
-    export_table_to_csv(db_path, output_dir, table_name, columns)
-
-    os.remove(db_path)
+    #export_table_to_csv(db_path, output_dir, table_name, columns)
+    #clean_csv('/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/Import.csv', '/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/ImportClean.csv')
+    import_csv_to_mysql('/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/ImportA.csv', 'Cards', 'flashcards')
+    #os.remove(db_path)
 
 if __name__ == "__main__":
     main()
