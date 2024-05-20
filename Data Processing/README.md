@@ -1,6 +1,6 @@
 # Anki2db.py
 
-The `Anki2db.py` file is a script that allows you to convert Anki deck files into a database format. It provides a function `convert_anki_to_db` which takes the Anki deck file as input and performs the conversion process. The script reads the Anki deck file, extracts the necessary information, and stores it in a SQLite database.
+The `Anki2db.py` file is a script that allows you to convert Anki deck files into a database format. It provides a function `convert_anki_to_db` which takes the Anki deck file as input and performs the conversion process. The script reads the Anki deck file, extracts the necessary information, and stores it in a SQLite database. It can also clean the data and export it to MySQL format.
 
 ## Usage
 
