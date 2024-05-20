@@ -15,23 +15,38 @@ import zipfile
 import csv
 import sys  
 import pandas as pd
+import subprocess
 from sqlalchemy import create_engine
 
 # -*- coding: utf_8 -*-
 
 def extract_db_from_apkg(apkg_path):
-    """Extracts the collection.anki2 file from an .apkg file."""
+    """
+    Extracts the collection.anki2 file from an .apkg file.
+
+    Args:
+        apkg_path (str): The path to the .apkg file.
+
+    Returns:
+        str: The name of the temporary file where the extracted data is stored.
+    """
     with zipfile.ZipFile(apkg_path, 'r') as myzip:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(myzip.read('collection.anki2'))
             return tmp.name
 
-def print_table_names(db_path, print_columns=False):
-    """Prints the names of all tables in a SQLite database.
+
+def print_table_names(db_path, print_columns):
+    """
+    Prints the names of all tables in a SQLite database.
 
     Args:
-        db_path: A string representing the path to the SQLite database file.
-        print_columns: A boolean indicating whether to print the columns of each table.
+        db_path (str): A string representing the path to the SQLite database file.
+        print_columns (bool, optional): A boolean indicating whether to print the columns of each table.
+
+    Returns:
+        None.
+
     """
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
@@ -50,11 +65,15 @@ def print_table_names(db_path, print_columns=False):
 
 
 def print_models(db_path, ids):
-    """Prints specific rows' values from the models column in the col table.
+    """
+    Prints specific rows' values from the models column in the col table.
 
     Args:
-        db_path: A string representing the path to the SQLite database file.
-        ids: A list of integers representing the id numbers of the rows.
+        db_path (str): A string representing the path to the SQLite database file.
+        ids (list[int]): A list of integers representing the id numbers of the rows.
+
+    Returns:
+        None
     """
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
@@ -69,14 +88,18 @@ def print_models(db_path, ids):
 
 
 def replace_char_in_db(db_path, table_name, column_name, old_char, new_char):
-    """Replaces a character in a specific column of a specific table in a SQLite database.
+    """
+    Replaces a character for another char in a specified column of a specified table in a SQLite database.
 
     Args:
-        db_path: A string representing the path to the SQLite database file.
-        table_name: A string representing the name of the table.
-        column_name: A string representing the name of the column.
-        old_char: The character to be replaced.
-        new_char: The character to replace with.
+        db_path (str): The path to the SQLite database file.
+        table_name (str): The name of the table.
+        column_name (str): The name of the column.
+        old_char (str): The character to be replaced.
+        new_char (str): The character to replace with.
+
+    Returns:
+        None
     """
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
@@ -95,10 +118,13 @@ def export_table_to_csv(db_path, output_dir, table_name, columns):
     """Exports specific columns from a specific table in a SQLite database to a CSV file.
 
     Args:
-        db_path: A string representing the path to the SQLite database file.
-        output_dir: A string representing the directory to output the CSV files.
-        table_name: A string representing the name of the table.
-        columns: A list of strings representing the names of the columns.
+        db_path (str): A string representing the path to the SQLite database file.
+        output_dir (str): A string representing the directory to output the CSV files.
+        table_name (str): A string representing the name of the table.
+        columns (list): A list of strings representing the names of the columns.
+
+    Returns:
+        None
     """
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
@@ -122,11 +148,15 @@ def export_table_to_csv(db_path, output_dir, table_name, columns):
 
 
 def printfields(db_path, id):
-    """Prints a specific row's values from the flds column in the notes table.
+    """
+    Prints a specific row's values from the flds column in the notes table. (flds is split by '\x1f'.)
 
     Args:
-        db_path: A string representing the path to the SQLite database file.
-        id: An integer representing the id number of the row.
+        db_path (str): A string representing the path to the SQLite database file.
+        id (int): An integer representing the id number of the row.
+
+    Returns:
+        None
     """
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
@@ -140,9 +170,17 @@ def printfields(db_path, id):
 
 
 
-
-
 def clean_csv(input_file_path, output_file_path):
+    """
+    Cleans a CSV file by removing problematic characters and adjacent pipes.
+
+    Args:
+        input_file_path (str): The path to the input CSV file.
+        output_file_path (str): The path to the output CSV file.
+
+    Returns:
+        None
+    """
     # Open the input CSV file in binary mode and read the content
     with open(input_file_path, 'rb') as file:
         binary_content = file.read()
@@ -166,8 +204,19 @@ def clean_csv(input_file_path, output_file_path):
 
 
 
-
 def import_csv_to_mysql(csv_file_path, mysql_db_name, table_name):
+    """
+    Imports data from a CSV file into the specified MySQL database table.
+
+    Args:
+        csv_file_path (str): The file path of the CSV file to import.
+        mysql_db_name (str): The name of the MySQL database.
+        table_name (str): The name of the table in the MySQL database.
+
+    Returns:
+        str: A message indicating the success of the data import.
+
+    """
     # Create a connection to the MySQL database
     engine = create_engine(f'mysql+pymysql://root:@localhost/{mysql_db_name}')    
 
@@ -180,10 +229,45 @@ def import_csv_to_mysql(csv_file_path, mysql_db_name, table_name):
     return f"Data imported to {mysql_db_name} database"
 
 
+def extract_apkg_to_sql(apkg_path, mysql_db_name):
+    """
+    Extracts the contents of an .apkg file and saves it to a MySQL database.
+
+    Args:
+        apkg_path (str): The path to the .apkg file.
+        mysql_db_name (str): The name of the MySQL database.
+
+    Returns:
+        str: A message indicating the success of the data extraction and import.
+    """
+    # Create a temporary directory
+    temp_dir = tempfile.mkdtemp()
+
+    # Open the .apkg file
+    with zipfile.ZipFile(apkg_path, 'r') as zip_ref:
+        # Extract all the contents of the .apkg file into the temporary directory
+        zip_ref.extractall(temp_dir)
+
+    # The SQLite database file is named 'collection.anki2'
+    sqlite_db_path = os.path.join(temp_dir, 'collection.anki2')
+
+    # The SQL file will be saved in the same directory
+    sql_file_path = os.path.join(temp_dir, 'collection.sql')
+
+    # Use sqlite3 to dump the SQLite database to a SQL file
+    subprocess.run(f'sqlite3 {sqlite_db_path} .dump > {sql_file_path}', shell=True, check=True)
+
+    # Use mysql to import the SQL file into the MySQL
+    subprocess.run(f'mysql -u root -h localhost -p {mysql_db_name} < {sql_file_path}', shell=True, check=True)
+
+    return "Data saved to MySQL database"
+
 
 def main():
     """Main function to run the script."""
     apkg_path = '/Users/air/Desktop/delete/WaniKani_Complete_Lv_1-60.apkg'
+    mysql_db_name = 'FlashcardDB'  # name MySQL database
+
     db_path = extract_db_from_apkg(apkg_path)
     print(db_path)
     #print_table_names(db_path, print_columns=True)
@@ -192,14 +276,23 @@ def main():
     #export_tables_to_csv(db_path, '/Users/air/Desktop/delete')
     #printfields(db_path,1413122652443 )
 
-    #replace_char_in_db(db_path, 'notes', 'flds', '\x1f', '|')
+    replace_char_in_db(db_path, 'notes', 'flds', '\x1f', '|')
     output_dir = '/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv'
     table_name = 'notes'
     columns = ['flds']
-    #export_table_to_csv(db_path, output_dir, table_name, columns)
-    #clean_csv('/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/Import.csv', '/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/ImportClean.csv')
+    
+    export_table_to_csv(db_path, output_dir, table_name, columns)
+    
+    clean_csv('/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/Import.csv', '/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/ImportClean.csv')
+    
+    #Import the cleaned CSV file into a MySQL database
     import_csv_to_mysql('/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/ImportA.csv', 'Cards', 'flashcards')
-    #os.remove(db_path)
+    
+    #Extract the .apkg file to a MySQL database
+    mysql_db_name = 'FlashcardDB'  # replace with the name of your MySQL database
+    extract_apkg_to_sql(apkg_path, mysql_db_name)
+    
+    os.remove(db_path)
 
 if __name__ == "__main__":
     main()
