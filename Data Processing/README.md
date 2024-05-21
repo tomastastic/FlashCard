@@ -31,12 +31,21 @@ This command will convert the `my_deck.anki` file into a SQLite database and sav
 
 ## Dependencies
 
-The `Anki2db.py` script requires the following dependencies:
+The `Anki2db.py` script requires the following dependencies, version is specified in requirements.txt:
 
-- Python 3.5
+- Python 
 - SQLite3
+- json
+- os
+- sqlite3
+- tempfile
+- zipfile
+- csv
+- sys
+- pandas
+- subprocess
+- sqlalchemy
 
-Please ensure that these dependencies are installed on your system before running the script.
 
 ## License
 
