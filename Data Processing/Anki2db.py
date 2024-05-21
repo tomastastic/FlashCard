@@ -265,11 +265,11 @@ def extract_apkg_to_sql(apkg_path, mysql_db_name):
 
 def main():
     """Main function to run the script."""
+    # local variables
     apkg_path = '/Users/air/Desktop/delete/WaniKani_Complete_Lv_1-60.apkg'
     mysql_db_name = 'FlashcardDB'  # name MySQL database
-
     db_path = extract_db_from_apkg(apkg_path)
-    print(db_path)
+   
     #print_table_names(db_path, print_columns=True)
     ids = [1411914227416, 1413076182153, 1413061256153]
     #print_models(db_path, ids)
@@ -288,7 +288,7 @@ def main():
     #Import the cleaned CSV file into a MySQL database
     import_csv_to_mysql('/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/ImportA.csv', 'Cards', 'flashcards')
     
-    #Extract the .apkg file to a MySQL database
+    #Export the .apkg file to a MySQL database
     mysql_db_name = 'FlashcardDB'  # replace with the name of your MySQL database
     extract_apkg_to_sql(apkg_path, mysql_db_name)
     
