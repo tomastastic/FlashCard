@@ -1,11 +1,11 @@
 
 
 '''
-Goal: Find out about the structure of the file for conversion
-    1. Find out the: cards, notes, decks, note types, deck options
-    2. Find out what fields contain the relation keys
-    3. Separate the decks into separate dbs
-    4. What about sound files?
+Goal: Find out about the structure of the Anki file and convert it into a SQL compatible export.
+    1. Find out the schema: cards, notes, decks, note types, deck options
+    2. Find out what fields contain the primary and foreign keys
+    3. Extract the relevant structured and unstructured data 
+    4. 
 '''
 import json
 import os
@@ -22,7 +22,7 @@ from sqlalchemy import create_engine
 
 def extract_db_from_apkg(apkg_path):
     """
-    Extracts the collection.anki2 file from an .apkg file.
+    Extracts the collection.anki2 file from the .apkg file.
 
     Args:
         apkg_path (str): The path to the .apkg file.
@@ -89,7 +89,7 @@ def print_models(db_path, ids):
 
 def replace_char_in_db(db_path, table_name, column_name, old_char, new_char):
     """
-    Replaces a character for another char in a specified column of a specified table in a SQLite database.
+    Replaces a problematic character for another char in a specified column of a specified table in a SQLite database.
 
     Args:
         db_path (str): The path to the SQLite database file.
@@ -231,7 +231,8 @@ def import_csv_to_mysql(csv_file_path, mysql_db_name, table_name):
 
 def extract_apkg_to_sql(apkg_path, mysql_db_name):
     """
-    Extracts the contents of an .apkg file and saves it to a MySQL database.
+    #BUG|: This function is not working as expected.
+    Extracts the contents of an .apkg file and directly exports it to a MySQL database.
 
     Args:
         apkg_path (str): The path to the .apkg file.
@@ -265,34 +266,41 @@ def extract_apkg_to_sql(apkg_path, mysql_db_name):
 
 def main():
     """Main function to run the script."""
+    
+   
     # local variables
     apkg_path = '/Users/air/Desktop/delete/WaniKani_Complete_Lv_1-60.apkg'
     mysql_db_name = 'FlashcardDB'  # name MySQL database
     db_path = extract_db_from_apkg(apkg_path)
-   
+    
+    """Data Exploration/Analysis"""
     #print_table_names(db_path, print_columns=True)
-    ids = [1411914227416, 1413076182153, 1413061256153]
+    #ids = [1411914227416, 1413076182153, 1413061256153]
     #print_models(db_path, ids)
     #export_tables_to_csv(db_path, '/Users/air/Desktop/delete')
     #printfields(db_path,1413122652443 )
 
+    """Data Cleaning."""
     replace_char_in_db(db_path, 'notes', 'flds', '\x1f', '|')
+    
+    """Exporting"""
     output_dir = '/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv'
     table_name = 'notes'
     columns = ['flds']
     
-    export_table_to_csv(db_path, output_dir, table_name, columns)
-    
-    clean_csv('/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/Import.csv', '/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/ImportClean.csv')
-    
-    #Import the cleaned CSV file into a MySQL database
+    # Export the notes table to a CSV file
+    export_table_to_csv(db_path, output_dir, table_name, columns) 
+    # Clean the exported CSV file 
+    clean_csv('/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/Import.csv', '/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/ImportClean.csv')  
+    # Import the cleaned CSV file into a MySQL database
     import_csv_to_mysql('/Users/air/Desktop/delete/WaniKaniCSV/trimmed csv/ImportA.csv', 'Cards', 'flashcards')
     
-    #Export the .apkg file to a MySQL database
-    mysql_db_name = 'FlashcardDB'  # replace with the name of your MySQL database
-    extract_apkg_to_sql(apkg_path, mysql_db_name)
     
-    os.remove(db_path)
+    """(NOT Working)Export the .apkg file to a MySQL database"""
+    #mysql_db_name = 'FlashcardDB'  # replace with the name of your MySQL database
+    #extract_apkg_to_sql(apkg_path, mysql_db_name)
+    
+    os.remove(db_path) # remove the temporary file
 
 if __name__ == "__main__":
     main()
