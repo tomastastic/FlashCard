@@ -1,75 +1,40 @@
 # FlashCard
-FlashCard website
 
-DB schema
 
-1. `col` (Collection options):
-    - `id`: Collection ID
-    - `crt`: Collection creation time
-    - `mod`: Last modification time
-    - `scm`: Schema modification time
-    - `ver`: Version
-    - `dty`: Dirty flag
-    - `usn`: Update sequence number
-    - `ls`: Last sync time
-    - `conf`: Configuration options
-    - `models`: Deck models
-    - `decks`: Decks
-    - `dconf`: Deck configuration
-    - `tags`: Tags
 
-2. `notes` (Notes, which can generate one or more cards):
-    - `id`: Note ID
-    - `guid`: Globally unique ID
-    - `mid`: Model ID
-    - `mod`: Last modification time
-    - `usn`: Update sequence number
-    - `tags`: Space-separated list of tags
-    - `flds`: The values of the note's fields, separated by 0x1f (31) character
-    - `sfld`: Sort field
-    - `csum`: Checksum of the first field
-    - `flags`: Currently unused
-    - `data`: Currently unused
+## Description
+The goal of the FlashCard project is to create a website for reviewing flashcards to practice Japanese Kanji. The flashcards, which include kanji, vocabulary, and radicals, are stored in a MySQL database. Users can access these flashcards to enhance their learning experience.
 
-3. `cards` (Cards, which are generated from notes):
-    - `id`: Card ID
-    - `nid`: Note ID
-    - `did`: Deck ID
-    - `ord`: Ordinal (the card's place in the note)
-    - `mod`: Last modification time
-    - `usn`: Update sequence number
-    - `type`: Card type
-    - `queue`: Queue state
-    - `due`: Due date
-    - `ivl`: Interval
-    - `factor`: Ease factor
-    - `reps`: Number of reviews
-    - `lapses`: Number of lapses
-    - `left`: Reviews left till graduation
-    - `odue`: Original due date (for cards in filtered deck)
-    - `odid`: Original deck ID (for cards in filtered deck)
-    - `flags`: Currently unused
-    - `data`: Currently unused
+## Development Roadmap
 
-4. `revlog` (Review logs):
-    - `id`: Review ID
-    - `cid`: Card ID
-    - `usn`: Update sequence number
-    - `ease`: Ease factor
-    - `ivl`: Interval
-    - `lastIvl`: Last interval
-    - `factor`: Ease factor
-    - `time`: Review time
-    - `type`: Review type
+The development of this project is divided into several stages:
 
-5. `graves` (Deleted items):
-    - `usn`: Update sequence number
-    - `oid`: Original ID
-    - `type`: Type of the deleted item
+1. **Data Processing**: The project started by taking an existing database and processing the data for importing into MySQL. The code for this step can be found in the `Data Processing` folder.
 
-6. `sqlite_stat1` (Internal SQLite statistics table):
-    - `tbl`: Table name
-    - `idx`: Index name
-    - `stat`: Statistical data
+2. **API Development**: Currently, an API is being developed to access the MySQL database, following a microservices style. The code for this step can be found in the `my-fastapi-app` folder.
 
-Please note that the exact structure can vary depending on the version of Anki you are using. If you have a specific question about a table or field, feel free to ask!
+3. **Website Development**: A website that will present the data and interact with the user is also in progress. The code for this step can be found in the `Flaskapp` folder.
+## Installation
+To install this project, follow these steps:
+1. Clone the repository: `git clone [repository URL]`
+2. Navigate to the project directory: `cd my-project`
+3. Install the dependencies: `npm install`
+
+## Usage
+To use this project, follow these steps:
+1. [Provide step-by-step instructions on how to use the project]
+2. [Include any code examples or screenshots if necessary]
+
+## Contributing
+If you would like to contribute to this project, please follow these guidelines:
+1. Fork the repository
+2. Create a new branch: `git checkout -b feature/your-feature`
+3. Make your changes and commit them: `git commit -m 'Add your changes'`
+4. Push to the branch: `git push origin feature/your-feature`
+5. Submit a pull request
+
+## License
+This project is licensed under the [license name]. See the [LICENSE](LICENSE) file for more details.
+
+## Contact
+For any questions or suggestions, please feel free to reach out to us at [contact email].
