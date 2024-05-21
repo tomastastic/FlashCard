@@ -1,6 +1,6 @@
-# FastAPI API for CRUD Operations on a MySQL Database
+# API WORK IN PROGRESS
 
-This project is a FastAPI application that provides CRUD (Create, Read, Update, Delete) operations on a MySQL database. It allows you to interact with the database through HTTP endpoints and perform various operations on the data.
+This directory is for the FastAPI application that provides CRUD (Create, Read, Update, Delete) operations on the MySQL database that stores the study resources and the users data. 
 
 ## Project Structure
 
@@ -88,16 +88,8 @@ Please refer to the `app/api/routes.py` file for more details on the API endpoin
 
 The MySQL database connection details can be configured in the `app/database/db.py` file. Update the `DATABASE_URL` variable with your MySQL database connection string.
 
-## Contributing
-
-Contributions are welcome! If you have any suggestions, improvements, or bug fixes, please open an issue or submit a pull request.
 
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
 
-## Contact
-
-If you have any questions or need further assistance, please feel free to contact me at [your-email@example.com](mailto:your-email@example.com).
-
-Happy coding!
