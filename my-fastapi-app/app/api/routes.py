@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/")
-async def read_root():
+def read():
     return {"message": "Hello, World!"}
 
 # CRUD routes 
