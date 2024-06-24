@@ -1,3 +1,5 @@
+'''
+
 from fastapi import APIRouter, HTTPException
 from sqlalchemy.orm import Session
 from app.database.db import get_db
@@ -14,9 +16,9 @@ router = APIRouter()
 def read():
     return {"message": "Hello, World!"}
 
+
+
 # CRUD routes 
-
-
 @router.post("/users", response_model=User)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = User(**user.dict())
@@ -51,4 +53,4 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(db_user)
     db.commit()
     return {"detail": "User deleted"}
- 
+'''
