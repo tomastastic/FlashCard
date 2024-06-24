@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine, Column, Integer, String, Enum
+from sqlalchemy import create_engine, Column, Integer, String, Enum as SQLAlchemyEnum
+from enum import Enum as PyEnum
+
 
 Base = declarative_base()
 
@@ -15,7 +17,7 @@ class Flashcard(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     level = Column(Integer, index=True)
-    type = Column(Enum(FlashcardType), index=True)
+    type = Column(SQLAlchemyEnum(FlashcardType), index=True)
     fields = Column(String(255))
 
 #User SQLAlchemy model for users

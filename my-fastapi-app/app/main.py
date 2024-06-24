@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel
 from typing import  List, Optional, Annotated
 import models
-from database import SessionLocal, engine
+from db import SessionLocal, engine
 from sqlalchemy.orm import Session
 from uuid import UUID, uuid4 #i dont need this?
 
@@ -43,7 +43,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 ## API ENDPOINTS
 # READ 10 flashcards
 
-@app.get("/flashcards", response_model=List[models.Flashcard])
+@app.get("/flashcards", response_model=None) #fix this response_model=List[models.Flashcard]
 def read_flashcards(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     flashcards = db.query(models.Flashcard).offset(skip).limit(limit).all()
     return flashcards

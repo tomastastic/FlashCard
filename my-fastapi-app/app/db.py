@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # fix url
-URL_DATABASE = 'mysql+mysqlconnector://root:Ordenador1/@localhost:3306/BlogApplication'
+URL_DATABASE = 'mysql+mysqlconnector://root:Ordenador1/@localhost:3306/Cards'
 
 engine = create_engine(URL_DATABASE)
 
