@@ -19,6 +19,10 @@ class Flashcard(Base):
     level = Column(Integer, index=True)
     type = Column(SQLAlchemyEnum(FlashcardType), index=True)
     fields = Column(String(255))
+    
+    class Config:
+        from_attributes = True
+    
 
 #User SQLAlchemy model for users
 '''
