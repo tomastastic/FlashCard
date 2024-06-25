@@ -1,21 +1,17 @@
+## Pydantic models  
 from pydantic import BaseModel
+from enum import Enum
 
+class FlashcardType(str, Enum):
+    kanji = "kanji"
+    vocab = "vocab"
+    radical = "radical"
 
-class ItemBase(BaseModel):
-    name: str
-    price: float
-
-
-class ItemCreate(ItemBase):
-    pass
-
-
-class ItemUpdate(ItemBase):
-    pass
-
-
-class Item(ItemBase):
+class FlashcardBase(BaseModel):
     id: int
+    level: int
+    type: FlashcardType
+    fields: str
 
     class Config:
         orm_mode = True

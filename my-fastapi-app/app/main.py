@@ -1,34 +1,18 @@
+# Importing necessary modules and functions
 from fastapi import FastAPI, HTTPException, Depends, status
-from pydantic import BaseModel
 from typing import  List, Optional, Annotated
-import models 
-from db import SessionLocal, engine
 from sqlalchemy.orm import Session
 from typing import List
 
-from uuid import UUID, uuid4 #i dont need this?
+# Importing models for database operations
+import models 
+# Importing FlashcardBase from schemas for request and response handling
+from schemas import FlashcardBase
+# Importing SessionLocal and engine from db for database session management
+from db import SessionLocal, engine
 
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
-
-## Pydantic models  
-from pydantic import BaseModel
-from enum import Enum
-
-class FlashcardType(str, Enum):
-    kanji = "kanji"
-    vocab = "vocab"
-    radical = "radical"
-
-class FlashcardBase(BaseModel):
-    id: int
-    level: int
-    type: FlashcardType
-    fields: str
-
-    class Config:
-        orm_mode = True
-## Pydantic schemas END
 
 
 #Method get_db
@@ -43,7 +27,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 #Method get_db END
 
 ## API ENDPOINTS
-# READ 10 flashcards
+
 
 @app.get("/flashcards", response_model=List[FlashcardBase]) 
 def read_flashcards(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
