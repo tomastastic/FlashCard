@@ -11,6 +11,7 @@ class FlashcardType(PyEnum):
     kanji = "kanji"
     vocab = "vocab"
     radical = "radical"
+
 # Flashcards models
 class Flashcard(Base):
     __tablename__ = "flashcards"
@@ -24,8 +25,7 @@ class Flashcard(Base):
         from_attributes = True
     
 
-#User SQLAlchemy model for users
-'''
+#User SQLAlchemy model 
 class User(Base):
     __tablename__ = "users"
 
@@ -34,4 +34,3 @@ class User(Base):
     password = Column(String(64))
     email = Column(String(64), unique=True, index=True)
     created_at = Column(DateTime)
-'''
