@@ -10,10 +10,12 @@ import models
 from schemas import FlashcardBase, UserBase
 # Importing SessionLocal and engine from db for database session management
 from db import SessionLocal, engine
+# Importing auth route for authentication
+import auth
 
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
-
+app.include_router(auth.router)
 
 #Method get_db
 def get_db():

@@ -1,4 +1,5 @@
 ## Pydantic models  
+from typing import Optional
 from pydantic import BaseModel
 from enum import Enum
 from datetime import datetime
@@ -25,6 +26,8 @@ class UserBase(BaseModel):
     password: str
     email: str
     created_at: datetime
+    created_at: Optional[datetime] = None
+
 
     class Config:
         orm_mode = True

@@ -25,7 +25,7 @@ class Flashcard(Base):
         from_attributes = True
     
 
-#User SQLAlchemy model 
+#User SQLAlchemy model for users
 class User(Base):
     __tablename__ = "users"
 
