@@ -12,6 +12,7 @@ from schemas import FlashcardBase, UserBase
 from db import SessionLocal, engine
 # Importing auth route for authentication
 import auth
+from auth import get_current_user
 
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
@@ -26,6 +27,8 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
+user_dependency = Annotated [dict, Depends (get_current_user)]
+
 #Method get_db END
 
 ## API ENDPOINTS
@@ -41,6 +44,14 @@ def read_flashcards(skip: int = 0, limit: int = 10, db: Session = Depends(get_db
 def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     users = db.query(models.User).offset(skip).limit(limit).all()
     return users
+
+
+#async def user(user: Optional[str] = Depends(user_dependency), db: Optional[str] = Depends(db_dependency)):
+@app.get("/", status_code=status.HTTP_200_OK)
+async def user(user: Optional[str] = user_dependency, db: Optional[str] = db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401, detail='Authentication Failed')
+    return {"User": user}
 
 '''
 app.include_router(routes.router)
