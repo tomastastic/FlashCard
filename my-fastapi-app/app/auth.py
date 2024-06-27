@@ -9,13 +9,21 @@ from models import User
 from passlib.context import CryptContext 
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
+import os
+from dotenv import load_dotenv
+
+
 
 router = APIRouter(
     prefix="/auth",
     tags=["auth"]
 )
-SECRET_KEY = "secret"
-ALGORITHM = 'HS256'
+
+# Load environment variables from .env file
+load_dotenv()
+# Access the environment variables
+SECRET_KEY = os.getenv('SECRET_KEY')
+ALGORITHM = os.getenv('ALGORITHM')
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
@@ -50,6 +58,7 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
     )
     db.add(create_user_model)
     db.commit()
+
 ''' create user but it checks if the username is already in the database
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
     existing_user = db.query(User).filter(User.username == create_user_request.username).first()
