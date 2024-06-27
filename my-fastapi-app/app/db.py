@@ -2,8 +2,15 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-# fix url
-URL_DATABASE = 'mysql+mysqlconnector://root:Ordenador1/@localhost:3306/Cards'
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+
+
+URL_DATABASE = os.getenv('URL_DATABASE')
 
 engine = create_engine(URL_DATABASE)
 
