@@ -28,7 +28,7 @@ ALGORITHM = os.getenv('ALGORITHM')
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
-class CreateUserRequest(BaseModel):         #might need to fix the data types
+class CreateUserRequest(BaseModel):         
     username: str
     password: str
     email: str
@@ -37,35 +37,26 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-def getdb():                                #should this be here? can i import it from main.py?
+def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-db_dependency = Annotated[Session, Depends(getdb)]                       # this should be in main.py
+db_dependency = Annotated[Session, Depends(get_db)]                       
 #user_dependency = Annotated [dict, Depends (get_current_user)]
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
-    create_user_model = User(
-        username=create_user_request.username,
-        password=bcrypt_context.hash(create_user_request.password),
-        email=create_user_request.email,
-        created_at=datetime.now(),
-    )
-    db.add(create_user_model)
-    db.commit()
-
-''' create user but it checks if the username is already in the database
-async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
-    existing_user = db.query(User).filter(User.username == create_user_request.username).first()
+    existing_user = db.query(User).filter(
+        (User.username == create_user_request.username) | (User.email == create_user_request.email)
+    ).first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already exists."
+            detail="Username or email already exists."
         )
     create_user_model = User(
         username=create_user_request.username,
@@ -75,7 +66,7 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
     )
     db.add(create_user_model)
     db.commit()
-'''
+
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
