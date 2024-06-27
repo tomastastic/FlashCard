@@ -48,7 +48,7 @@ def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
 
 #async def user(user: Optional[str] = Depends(user_dependency), db: Optional[str] = Depends(db_dependency)):
 @app.get("/", status_code=status.HTTP_200_OK)
-async def user(user: Optional[str] = user_dependency, db: Optional[str] = db_dependency):
+async def user(user: user_dependency, db: db_dependency):
     if user is None:
         raise HTTPException(status_code=401, detail='Authentication Failed')
     return {"User": user}
