@@ -4,16 +4,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel 
 from sqlalchemy.orm import Session 
 from starlette import status 
-from db import SessionLocal 
-from models import User 
+from dotenv import load_dotenv
 from passlib.context import CryptContext 
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 import os
-from dotenv import load_dotenv
 
+from db import SessionLocal 
+from models import User 
 
-
+""" What is this? """
 router = APIRouter(
     prefix="/auth",
     tags=["auth"]
@@ -25,9 +25,11 @@ load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
 
+''' SHOULD these be in .env?'''
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
+""" SHOULD these be in schemas.py? """
 class CreateUserRequest(BaseModel):         
     username: str
     password: str
@@ -43,6 +45,7 @@ def get_db():
         yield db
     finally:
         db.close()
+""""""
 
 db_dependency = Annotated[Session, Depends(get_db)]                       
 #user_dependency = Annotated [dict, Depends (get_current_user)]

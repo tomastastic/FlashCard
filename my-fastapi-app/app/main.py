@@ -35,7 +35,7 @@ user_dependency = Annotated [dict, Depends (get_current_user)]
 
 # Flashcards
 @app.get("/flashcards", response_model=List[FlashcardBase]) 
-def read_flashcards(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def read_flashcards(skip: int = 0, limit: int = 10, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     flashcards = db.query(models.Flashcard).offset(skip).limit(limit).all()
     return flashcards
 
