@@ -8,24 +8,20 @@ from typing import List
 import models 
 # Importing FlashcardBase from schemas for request and response handling
 from schemas import FlashcardBase, UserBase
-# Importing SessionLocal and engine from db for database session management
-from db import SessionLocal, engine
+# Importing engine and get_db from db for database session management
+from db import engine, get_db
 # Importing auth route for authentication
-import auth
+
 from auth import get_current_user
+from router import auth_router, main_router
+
 
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
-app.include_router(auth.router)
+app.include_router(auth_router)
+app.include_router(main_router)
 
-#Method get_db
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
+'''
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated [dict, Depends (get_current_user)]
 
@@ -53,6 +49,7 @@ async def user(user: user_dependency, db: db_dependency):
         raise HTTPException(status_code=401, detail='Authentication Failed')
     return {"User": user}
 
+'''
 '''
 app.include_router(routes.router)
 
