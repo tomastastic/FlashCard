@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from enum import Enum
 from datetime import datetime
@@ -31,3 +31,12 @@ class UserBase(BaseModel):
 
     class Config:
         orm_mode = True
+
+class CreateUserRequest(BaseModel):         
+    username: str
+    password: str
+    email: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
