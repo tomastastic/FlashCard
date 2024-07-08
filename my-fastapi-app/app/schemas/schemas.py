@@ -25,7 +25,6 @@ class UserBase(BaseModel):
     username: str
     password: str
     email: str
-    created_at: datetime
     created_at: Optional[datetime] = None
 
 
@@ -35,7 +34,7 @@ class UserBase(BaseModel):
 class CreateUserRequest(BaseModel):         
     username: str
     password: str
-    email: str
+    email: EmailStr
 
 class Token(BaseModel):
     access_token: str
