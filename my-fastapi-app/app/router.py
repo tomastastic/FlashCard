@@ -8,6 +8,7 @@ from auth import get_current_user, create_user, login_for_access_token, authenti
 from schemas import FlashcardBase, UserBase, CreateUserRequest, Token
 from db import get_db
 import models
+
 # Create separate routers for auth and main routes
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 main_router = APIRouter(prefix="/main", tags=["main"])
@@ -23,6 +24,9 @@ async def register_user(db: db_dependency, create_user_request: CreateUserReques
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
     return await login_for_access_token(form_data, db)
 
+
+
+ 
 @main_router.get("/flashcards", response_model=List[FlashcardBase])
 def read_flashcards(skip: int = 0, limit: int = 10, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     flashcards = db.query(models.Flashcard).offset(skip).limit(limit).all()

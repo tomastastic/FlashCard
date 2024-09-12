@@ -26,8 +26,6 @@ class UserBase(BaseModel):
     password: str
     email: str
     created_at: Optional[datetime] = None
-
-
     class Config:
         orm_mode = True
 
