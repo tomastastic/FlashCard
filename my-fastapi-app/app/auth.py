@@ -12,7 +12,7 @@ import os
 
 from db import get_db
 from models import User 
-from schemas import CreateUserRequest, Token
+from schemas import UserBase, FlashcardType, FlashcardBase, CreateUserRequest, Token
 #from router import auth_router, main_router
 
 router = APIRouter(

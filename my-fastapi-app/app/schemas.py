@@ -37,3 +37,27 @@ class CreateUserRequest(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey, TIMESTAMP
+from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
+
+####  CardSchedule model
+
+# Pydantic schema for CardSchedule
+class CardSchedule(BaseModel):
+    id: Optional[int]
+    due: Optional[datetime]
+    stability: Optional[float]
+    difficulty: Optional[float]
+    elapsed_days: Optional[int]
+    scheduled_days: Optional[int]
+    reps: Optional[int]
+    lapses: Optional[int]
+    state: Optional[str]
+    last_review: Optional[datetime]
+    flashcard_id: Optional[int]
+    user_id: Optional[int]
+
+    class Config:
+        orm_mode = True
