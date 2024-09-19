@@ -4,7 +4,7 @@ from typing import  List, Optional, Annotated
 from sqlalchemy.orm import Session
 from typing import List
 
-# Importing models for database operations    -----------------------FIX THIS SOMEHOW
+# Importing models for database operations    FIX THIS SOMEHOW
 from . import models
 # Importing FlashcardBase from schemas for request and response handling
 from .schemas import FlashcardBase, UserBase
