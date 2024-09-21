@@ -16,22 +16,25 @@ main_router = APIRouter(prefix="/main", tags=["main"])
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated [dict, Depends (get_current_user)]
 
+# Register endpoint
 @auth_router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(db: db_dependency, create_user_request: CreateUserRequest):
     return await create_user(db, create_user_request)
 
+# Log in endpoint
 @auth_router.post("/token", response_model=Token)
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
     return await login_for_access_token(form_data, db)
 
 
 
- 
+# Get all flashcards endpoint
 @main_router.get("/flashcards", response_model=List[FlashcardBase])
 def read_flashcards(skip: int = 0, limit: int = 10, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     flashcards = db.query(models.Flashcard).offset(skip).limit(limit).all()
     return flashcards
 
+# Get all users endpoint
 @main_router.get("/users", response_model=List[UserBase])
 def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     users = db.query(models.User).offset(skip).limit(limit).all()
@@ -43,10 +46,10 @@ async def user(user: user_dependency, db: db_dependency):
         raise HTTPException(status_code=401, detail='Authentication Failed')
     return {"User": user}
 
-### Cardschedule endpoint: 
-'''first check if the user has a flashcard in their CardSchedule and if it doesnt, 
-add the first flashcard from the flashcard table (order based on the flashcard id). 
-if the user does have a flashcard in their Cardschedule then add the subsequent flashcard (order based on the flashcard id)'''
+# Cardschedule endpoint: 
+'''first check if the user has a flashcard in their CardSchedule,
+if it doesnt, add the first flashcard from the flashcard table (order based on flashcard id). 
+if the user does have a flashcard in their Cardschedule then add the subsequent flashcard '''
 
 from fastapi import HTTPException
 from sqlalchemy.orm.exc import NoResultFound
@@ -86,27 +89,22 @@ def add_flashcard_to_schedule(db: Session = Depends(get_db), current_user: dict 
     db.refresh(new_schedule)
     return new_schedule
 
-## Cardschedule enpoint:
-''' 
-This endpoint will first check if the user has any flashcards in their CardSchedule. 
-If they don't, it will add the first flashcard from the Flashcard table. 
-If they do, it will add the subsequent flashcard.
-'''
 from fastapi import HTTPException
 from sqlalchemy import func
 from typing import List
 
-from sqlalchemy import func, extract
 @main_router.get("/cardschedule/due_flashcards", response_model=List[FlashcardBase])
 def get_due_flashcards(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     current_time = func.now()
-    due_flashcards = db.query(models.CardSchedule, models.Flashcard).join(models.Flashcard, models.CardSchedule.flashcard_id == models.Flashcard.id).filter(models.CardSchedule.user_id == current_user['id'], models.CardSchedule.due <= current_time).all()
+    truncated_current_time = func.date_format(current_time, '%Y-%m-%d %H:%i:00')
+    due_flashcards = db.query(models.CardSchedule, models.Flashcard).join(models.Flashcard, models.CardSchedule.flashcard_id == models.Flashcard.id).filter(models.CardSchedule.user_id == current_user['id'], func.date_format(models.CardSchedule.due, '%Y-%m-%d %H:%i:00') <= truncated_current_time).all()
 
     if not due_flashcards:
         raise HTTPException(status_code=404, detail="No flashcards due")
 
     return [flashcard for _, flashcard in due_flashcards]
-## Cardschedule endpoint:
+
+# Cardschedule endpoint:
 '''
 Make an endpoint called “scheduleUpdate” that takes as input one or more flashcard ids. 
 Then it will add 5 minutes to the due date of the flashcard on the cardschedule for the user
@@ -114,12 +112,12 @@ Then it will add 5 minutes to the due date of the flashcard on the cardschedule 
 from datetime import timedelta
 
 @main_router.put("/scheduleUpdate/")
-def update_schedule(flashcard_ids: List[int], db: Session = Depends(get_db)):
+def update_schedule(flashcard_ids: List[int], db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     for flashcard_id in flashcard_ids:
-        db_cardschedule = db.query(models.CardSchedule).filter(models.CardSchedule.flashcard_id == flashcard_id).first()
+        db_cardschedule = db.query(models.CardSchedule).filter(models.CardSchedule.flashcard_id == flashcard_id,models.CardSchedule.user_id == current_user['id']).first()
         if not db_cardschedule:
             raise HTTPException(status_code=404, detail=f"CardSchedule for flashcard_id {flashcard_id} not found")
-        db_cardschedule.due += timedelta(days=1)
+        db_cardschedule.due += timedelta(minutes=5)
     db.commit()
     return {"message": "Schedule updated successfully"}
 
