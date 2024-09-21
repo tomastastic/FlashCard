@@ -5,14 +5,14 @@ from sqlalchemy.orm import Session
 from typing import List
 
 # Importing models for database operations    FIX THIS SOMEHOW
-from . import models
+import models
 # Importing FlashcardBase from schemas for request and response handling
-from .schemas import FlashcardBase, UserBase
+from schemas import FlashcardBase, UserBase
 # Importing engine and get_db from db for database session management
-from .db import engine, get_db
+from db import engine, get_db
 # Importing auth route for authentication
 
-from .auth import get_current_user
+from auth import get_current_user
 from router import auth_router, main_router
 
 
