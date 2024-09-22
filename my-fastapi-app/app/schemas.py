@@ -61,3 +61,23 @@ class CardSchedule(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+##### Move to schemas.py if succesful
+from enum import Enum, IntEnum
+from typing import List, Annotated
+
+"""class Rating(str, Enum):
+    Again = "Again"
+    Hard = "Hard"
+    Good = "Good"
+    Easy = "Easy
+"""
+class FlashcardRating(BaseModel):
+    flashcard_id: int
+    rating: str
+
+class FlashcardRatingList(BaseModel):
+    ratings: FlashcardRating
+
+##### Move to schemas.py if succesful
